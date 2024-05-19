@@ -1,0 +1,4 @@
+{
+  "original_format": "\\b[A-Z]{3,}\\b",
+  "correct_format": "`\\b[A-Z]{3,}\\b`"
+}
