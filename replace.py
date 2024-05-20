@@ -2,9 +2,12 @@ import re
 import json
 import sys
 from pathlib import Path
+import argparse
 
-def load_json(filename):
-    with open(filename, 'r') as file:
+def load_json():
+    script_dir = Path(__file__).parent
+    json_path = script_dir / "expressions.json"
+    with open(json_path, 'r') as file:
         return json.load(file)
 
 def load_markdown(filename):
@@ -37,13 +40,17 @@ def reformat_content(content, expressions):
 
     return content, replacements
 
-def main(markdown_file, json_file):
-    expressions = load_json(json_file)
-    content = load_markdown(markdown_file)
+def main():
+    parser = argparse.ArgumentParser(description="Reformat Markdown content based on expressions from a hardcoded JSON file.")
+    parser.add_argument("markdown_file", help="The path to the Markdown file to be reformatted.")
+    args = parser.parse_args()
+
+    expressions = load_json()
+    content = load_markdown(args.markdown_file)
 
     updated_content, replacements = reformat_content(content, expressions)
 
-    output_file = Path(markdown_file).stem + "_reformatted.md"
+    output_file = Path(args.markdown_file).stem + "_reformatted.md"
     save_markdown(output_file, updated_content)
     print(f"Reformatted content saved to {output_file}")
 
@@ -55,9 +62,4 @@ def main(markdown_file, json_file):
         print("\nNo matching expressions found.")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <markdown_file> <json_file>")
-    else:
-        markdown_file = sys.argv[1]
-        json_file = sys.argv[2]
-        main(markdown_file, json_file)
+    main()
