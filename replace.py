@@ -16,23 +16,26 @@ def save_markdown(filename, content):
         file.write(content)
 
 def reformat_content(content, expressions):
-    original_format = expressions.get("original_format")
-    correct_format = expressions.get("correct_format")
-
-    original_pattern = re.compile(original_format)
-    correct_pattern = re.compile(correct_format)
-
     replacements = []
 
-    def replacer(match):
-        matched_text = match.group(0)
-        if not correct_pattern.match(matched_text):
-            replacements.append((matched_text, f"`{matched_text}`"))
-            return f"`{matched_text}`"
-        return matched_text
+    for expression in expressions:
+        original_format = expression.get("original_format")
+        correct_format = expression.get("correct_format")
 
-    updated_content = original_pattern.sub(replacer, content)
-    return updated_content, replacements
+        if original_format and correct_format:
+            original_pattern = re.compile(original_format)
+
+            def replacer(match):
+                matched_text = match.group(0)
+                # Use string comparison instead of regex for correct_format
+                if matched_text != correct_format.strip('`'):
+                    replacements.append((matched_text, f"`{matched_text}`"))
+                    return f"`{matched_text}`"
+                return matched_text
+
+            content = original_pattern.sub(replacer, content)
+
+    return content, replacements
 
 def main(markdown_file, json_file):
     expressions = load_json(json_file)
