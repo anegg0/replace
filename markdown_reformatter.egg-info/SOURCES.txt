@@ -1,0 +1,7 @@
+replace.py
+setup.py
+markdown_reformatter.egg-info/PKG-INFO
+markdown_reformatter.egg-info/SOURCES.txt
+markdown_reformatter.egg-info/dependency_links.txt
+markdown_reformatter.egg-info/entry_points.txt
+markdown_reformatter.egg-info/top_level.txt
