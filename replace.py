@@ -1,14 +1,21 @@
 import re
-import json
 import sys
 from pathlib import Path
 import argparse
 
-def load_json():
-    script_dir = Path(__file__).parent
-    json_path = script_dir / "expressions.json"
-    with open(json_path, 'r') as file:
-        return json.load(file)
+# Hardcoded JSON data
+expressions = [
+    {
+        "name": "CamelCase",
+        "original_format": r"(?<=\s)([a-z]+[a-zA-Z]*[A-Z][a-zA-Z]*)(?=\s)",
+        "correct_format": r"`\1`"
+    },
+    {
+        "name": "PascalCase",
+        "original_format": r"(?<=\s)([A-Z][a-z]*[A-Z][a-zA-Z]*)(?=\s)",
+        "correct_format": r"`\1`"
+    }
+]
 
 def load_markdown(filename):
     with open(filename, 'r') as file:
@@ -30,8 +37,11 @@ def reformat_content(content, expressions):
 
             def replacer(match):
                 matched_text = match.group(0)
-                # Use string comparison instead of regex for correct_format
-                if matched_text != correct_format.strip('`'):
+                # Check if the matched text is already surrounded by backticks
+                before = content[match.start() - 1] if match.start() > 0 else ""
+                after = content[match.end()] if match.end() < len(content) else ""
+                # Check if the matched text is the first word of a sentence
+                if before != '`' and after != '`' and not before.isalnum():
                     replacements.append((matched_text, f"`{matched_text}`"))
                     return f"`{matched_text}`"
                 return matched_text
@@ -41,11 +51,10 @@ def reformat_content(content, expressions):
     return content, replacements
 
 def main():
-    parser = argparse.ArgumentParser(description="Reformat Markdown content based on expressions from a hardcoded JSON file.")
+    parser = argparse.ArgumentParser(description="Reformat Markdown content based on hardcoded expressions.")
     parser.add_argument("markdown_file", help="The path to the Markdown file to be reformatted.")
     args = parser.parse_args()
 
-    expressions = load_json()
     content = load_markdown(args.markdown_file)
 
     updated_content, replacements = reformat_content(content, expressions)
